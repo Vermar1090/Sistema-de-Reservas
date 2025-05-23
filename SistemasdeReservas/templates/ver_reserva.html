@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Detalles de la Reserva #{{ reserva['id'] }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Información del Cliente</h5>
+                        <p><strong>Cliente:</strong> {{ reserva['cliente_nombre'] }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Estado de la Reserva</h5>
+                        <p>
+                            {% if reserva['estado'] == 'pendiente' %}
+                            <span class="badge bg-warning text-dark fs-6">Pendiente</span>
+                            {% elif reserva['estado'] == 'confirmada' %}
+                            <span class="badge bg-success fs-6">Confirmada</span>
+                            {% elif reserva['estado'] == 'cancelada' %}
+                            <span class="badge bg-danger fs-6">Cancelada</span>
+                            {% elif reserva['estado'] == 'completada' %}
+                            <span class="badge bg-info fs-6">Completada</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>Información del Servicio</h5>
+                        <p><strong>Servicio:</strong> {{ reserva['servicio_nombre'] }}</p>
+                        <p><strong>Descripción:</strong> {{ reserva['servicio_desc'] }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Empleado Asignado</h5>
+                        <p><strong>Empleado:</strong> {{ reserva['empleado_nombre'] }}</p>
+                        <p><strong>Especialidad:</strong> {{ reserva['especialidad'] }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Horario</h5>
+                        <p><strong>Fecha:</strong> {{ reserva['fecha'] }}</p>
+                        <p><strong>Hora Inicio:</strong> {{ reserva['hora_inicio'] }}</p>
+                        <p><strong>Hora Fin:</strong> {{ reserva['hora_fin'] }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {% if session['usuario_rol'] == 'admin' %}
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                        </a>
+                        {% elif session['usuario_rol'] == 'cliente' %}
+                        <a href="{{ url_for('cliente_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Mis Reservas
+                        </a>
+                        {% elif session['usuario_rol'] == 'empleado' %}
+                        <a href="{{ url_for('empleado_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a Mis Reservas
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Inicio
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    {% if session['usuario_rol'] == 'admin' and reserva['estado'] == 'pendiente' %}
+                    <div>
+                        <form method="POST" action="{{ url_for('confirmar_reserva', reserva_id=reserva['id']) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-success me-2" onclick="return confirm('¿Confirmar esta reserva?');">
+                                <i class="fas fa-check"></i> Confirmar
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('cancelar_reserva', reserva_id=reserva['id']) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Cancelar esta reserva?');">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

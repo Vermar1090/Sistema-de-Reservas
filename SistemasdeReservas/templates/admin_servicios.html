@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Gestión de Servicios</h4>
+            </div>
+            <div class="card-body">
+                <p>Administra los servicios ofrecidos en el sistema.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Nuevo Servicio</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Servicio</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duracion" class="form-label">Duración (minutos)</label>
+                        <input type="number" class="form-control" id="duracion" name="duracion" min="15" step="15" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="precio" class="form-label">Precio</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="precio" name="precio" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Guardar Servicio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Servicios Disponibles</h5>
+            </div>
+            <div class="card-body">
+                {% if servicios %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Duración</th>
+                                <th>Precio</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for servicio in servicios %}
+                            <tr>
+                                <td>{{ servicio['id'] }}</td>
+                                <td>{{ servicio['nombre'] }}</td>
+                                <td>{{ servicio['descripcion'] or 'Sin descripción' }}</td>
+                                <td>{{ servicio['duracion'] }} min</td>
+                                <td>${{ "%.2f"|format(servicio['precio']) }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal" data-bs-target="#editarModal{{ servicio['id'] }}">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" data-bs-target="#eliminarModal{{ servicio['id'] }}">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Modal para editar servicio -->
+                            <div class="modal fade" id="editarModal{{ servicio['id'] }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Editar Servicio</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ url_for('editar_servicio', servicio_id=servicio['id']) }}" method="POST">
+                                                <div class="mb-3">
+                                                    <label for="nombre{{ servicio['id'] }}" class="form-label">Nombre</label>
+                                                    <input type="text" class="form-control" id="nombre{{ servicio['id'] }}" 
+                                                           name="nombre" value="{{ servicio['nombre'] }}" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="descripcion{{ servicio['id'] }}" class="form-label">Descripción</label>
+                                                    <textarea class="form-control" id="descripcion{{ servicio['id'] }}" 
+                                                              name="descripcion" rows="3">{{ servicio['descripcion'] or '' }}</textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="duracion{{ servicio['id'] }}" class="form-label">Duración (minutos)</label>
+                                                    <input type="number" class="form-control" id="duracion{{ servicio['id'] }}" 
+                                                           name="duracion" value="{{ servicio['duracion'] }}" min="15" step="15" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label for="precio{{ servicio['id'] }}" class="form-label">Precio</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" class="form-control" id="precio{{ servicio['id'] }}" 
+                                                               name="precio" value="{{ servicio['precio'] }}" min="0" step="0.01" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal para eliminar servicio -->
+                            <div class="modal fade" id="eliminarModal{{ servicio['id'] }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>¿Estás seguro de que deseas eliminar el servicio "<strong>{{ servicio['nombre'] }}</strong>"?</p>
+                                            <p class="text-danger">Esta acción no se puede deshacer.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <form action="{{ url_for('eliminar_servicio', servicio_id=servicio['id']) }}" method="POST" style="display: inline;">
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No hay servicios registrados en el sistema.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

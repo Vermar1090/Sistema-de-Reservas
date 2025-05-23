@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Mi Panel de Cliente</h4>
+                <a href="{{ url_for('nueva_reserva') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-plus"></i> Nueva Reserva
+                </a>
+            </div>
+            <div class="card-body">
+                <h5>Bienvenido/a, {{ session['usuario_nombre'] }}</h5>
+                <p>Desde aquí puedes gestionar tus reservas y crear nuevas.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Mis Reservas</h5>
+            </div>
+            <div class="card-body">
+                {% if reservas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reserva in reservas %}
+                                <tr>
+                                    <td>{{ reserva['servicio'] }}</td>
+                                    <td>{{ reserva['fecha'] }}</td>
+                                    <td>{{ reserva['hora_inicio'] }} - {{ reserva['hora_fin'] }}</td>
+                                    <td>
+                                        {% if reserva['estado'] == 'pendiente' %}
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        {% elif reserva['estado'] == 'confirmada' %}
+                                            <span class="badge bg-success">Confirmada</span>
+                                        {% elif reserva['estado'] == 'cancelada' %}
+                                            <span class="badge bg-danger">Cancelada</span>
+                                        {% elif reserva['estado'] == 'completada' %}
+                                            <span class="badge bg-info">Completada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reserva['estado'] == 'pendiente' %}
+                                            <button class="btn btn-sm btn-outline-danger">Cancelar</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No tienes reservas registradas. ¡Crea tu primera reserva ahora!
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ url_for('nueva_reserva') }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i> Crear Reserva
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

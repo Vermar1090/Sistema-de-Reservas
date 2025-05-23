@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Nueva Reserva</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="servicio_id" class="form-label">Servicio</label>
+                            <select class="form-select" id="servicio_id" name="servicio_id" required>
+                                <option value="" selected disabled>Selecciona un servicio</option>
+                                {% for servicio in servicios %}
+                                <option value="{{ servicio['id'] }}">
+                                    {{ servicio['nombre'] }} - ${{ servicio['precio'] }} ({{ servicio['duracion'] }} min)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="empleado_id" class="form-label">Profesional</label>
+                            <select class="form-select" id="empleado_id" name="empleado_id" required>
+                                <option value="" selected disabled>Selecciona un profesional</option>
+                                {% for empleado in empleados %}
+                                <option value="{{ empleado['id'] }}">{{ empleado['nombre'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required
+                                   min="{{ now().strftime('%Y-%m-%d') }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="hora_inicio" class="form-label">Hora</label>
+                            <select class="form-select" id="hora_inicio" name="hora_inicio" required>
+                                <option value="" selected disabled>Selecciona una hora</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="12:00">12:00</option>
+                                <option value="13:00">13:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Detalles de la Reserva</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="reserva-detalles" class="alert alert-info">
+                                Selecciona un servicio, fecha y hora para ver los detalles de la reserva.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const servicioSelect = document.getElementById('servicio_id');
+        const fechaInput = document.getElementById('fecha');
+        const horaSelect = document.getElementById('hora_inicio');
+        const detallesDiv = document.getElementById('reserva-detalles');
+        
+        // Establecer la fecha mínima como hoy
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+        
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+        
+        fechaInput.min = yyyy + '-' + mm + '-' + dd;
+        
+        // Actualizar detalles de la reserva cuando cambian las selecciones
+        function actualizarDetalles() {
+            const servicioId = servicioSelect.value;
+            const servicioText = servicioSelect.options[servicioSelect.selectedIndex]?.text || '';
+            const fecha = fechaInput.value;
+            const hora = horaSelect.value;
+            
+            if (servicioId && fecha && hora) {
+                // Extraer duración y precio del texto de la opción
+                const duracionMatch = servicioText.match(/\((\d+) min\)/);
+                const precioMatch = servicioText.match(/\$(\d+(\.\d+)?)/);
+                
+                const duracion = duracionMatch ? duracionMatch[1] : '?';
+                const precio = precioMatch ? precioMatch[1] : '?';
+                
+                // Calcular hora de fin
+                const [horaInicio, minInicio] = hora.split(':').map(Number);
+                let horaFin = horaInicio;
+                let minFin = minInicio + parseInt(duracion);
+                
+                while (minFin >= 60) {
+                    horaFin++;
+                    minFin -= 60;
+                }
+                
+                const horaFinStr = `${horaFin.toString().padStart(2, '0')}:${minFin.toString().padStart(2, '0')}`;
+                
+                // Formatear fecha para mostrar
+                const fechaObj = new Date(fecha);
+                const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                detallesDiv.innerHTML = `
+                    <p><strong>Servicio:</strong> ${servicioText.split('-')[0].trim()}</p>
+                    <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+                    <p><strong>Horario:</strong> ${hora} a ${horaFinStr}</p>
+                    <p><strong>Duración:</strong> ${duracion} minutos</p>
+                    <p><strong>Precio:</strong> $${precio}</p>
+                `;
+                detallesDiv.className = 'alert alert-success';
+            } else {
+                detallesDiv.innerHTML = 'Selecciona un servicio, fecha y hora para ver los detalles de la reserva.';
+                detallesDiv.className = 'alert alert-info';
+            }
+        }
+        
+        servicioSelect.addEventListener('change', actualizarDetalles);
+        fechaInput.addEventListener('change', actualizarDetalles);
+        horaSelect.addEventListener('change', actualizarDetalles);
+    });
+</script>
+{% endblock %}
