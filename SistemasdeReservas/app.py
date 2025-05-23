@@ -16,8 +16,8 @@ app.secret_key = '16546+9898484*sdaf4as4dasdQAqAS'
 EMAIL_CONFIG = {
     'smtp_server': 'smtp.gmail.com',
     'smtp_port': 587,   
-    'email': 'reservasv39@gmail.com',  
-    'password': 'qejd mpsi kcoz nkdd',   
+    'email': 'example@gmail.com',  
+    'password': 'asdfsa wqewq asdasd wqeqwe',   
 }
 
 
