@@ -22,7 +22,7 @@ Un sistema de gestión de reservas desarrollado con Flask y SQLite, ideal para p
 1. Clonar el repositorio o descargar los archivos del proyecto:
 
 ```bash
-git clone https://github.com/tu-usuario/sistema-reservas.git
+git clone https://github.com/juandiegovm/sistema-reservas.git
 cd sistema-reservas
 ```
 
